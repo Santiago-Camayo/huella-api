@@ -1,0 +1,15 @@
+{
+  "name": "huella-api",
+  "version": "1.0.0",
+  "description": "API REST de Huella (adopción de mascotas)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.0",
+    "better-sqlite3": "^12.0.0",
+    "express": "^5.0.0",
+    "jsonwebtoken": "^9.0.0"
+  }
+}
