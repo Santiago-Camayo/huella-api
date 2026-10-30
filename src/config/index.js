@@ -14,4 +14,5 @@ module.exports = {
   PORT: process.env.PORT || 3000,
   JWT_SECRET: requerida('JWT_SECRET'), // clave para firmar tokens
   JWT_EXPIRA: '7d',
+  DATABASE_URL: requerida('DATABASE_URL'), // cadena de conexión de PostgreSQL (Supabase)
 };

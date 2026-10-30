@@ -1,18 +1,32 @@
-// Esquema de la base de datos (tablas e índices únicos que protegen las reglas de negocio).
+// Esquema de la base de datos (SRS sección 7): tablas e índices únicos que protegen las reglas de negocio.
 module.exports = `
+CREATE TABLE IF NOT EXISTS fundaciones (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nombre TEXT NOT NULL,
+  ciudad TEXT NOT NULL,
+  telefono TEXT,
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  fecha_registro TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS usuarios (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   nombre TEXT NOT NULL,
   correo TEXT NOT NULL UNIQUE,
   telefono TEXT,
   password_hash TEXT NOT NULL,
   rol TEXT NOT NULL CHECK (rol IN ('adoptante', 'fundacion')),
-  fecha_registro TEXT NOT NULL,
-  activo INTEGER NOT NULL DEFAULT 1 CHECK (activo IN (0, 1))
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  fecha_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  fundacion_id BIGINT REFERENCES fundaciones(id),
+  es_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  debe_cambiar_password BOOLEAN NOT NULL DEFAULT FALSE,
+  -- La fundación es obligatoria para el personal y vacía para los adoptantes
+  CHECK ((rol = 'fundacion') = (fundacion_id IS NOT NULL))
 );
 
 CREATE TABLE IF NOT EXISTS animales (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   nombre TEXT NOT NULL,
   especie TEXT NOT NULL CHECK (especie IN ('perro', 'gato', 'otro')),
   especie_otra TEXT,
@@ -21,25 +35,27 @@ CREATE TABLE IF NOT EXISTS animales (
   sexo TEXT NOT NULL CHECK (sexo IN ('macho', 'hembra')),
   descripcion TEXT,
   personalidad TEXT,
-  bueno_con_ninos INTEGER CHECK (bueno_con_ninos IN (0, 1)),
-  bueno_con_perros INTEGER CHECK (bueno_con_perros IN (0, 1)),
-  bueno_con_gatos INTEGER CHECK (bueno_con_gatos IN (0, 1)),
-  foto TEXT,
+  bueno_con_ninos BOOLEAN,
+  bueno_con_perros BOOLEAN,
+  bueno_con_gatos BOOLEAN,
+  foto TEXT NOT NULL, -- URL de la imagen
   estado TEXT NOT NULL DEFAULT 'disponible'
     CHECK (estado IN ('disponible', 'apartado', 'adoptado')),
-  fecha_registro TEXT NOT NULL,
-  activo INTEGER NOT NULL DEFAULT 1 CHECK (activo IN (0, 1))
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  fecha_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  fundacion_id BIGINT NOT NULL REFERENCES fundaciones(id),
+  CHECK (especie <> 'otro' OR especie_otra IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS solicitudes (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  animal_id INTEGER NOT NULL REFERENCES animales(id),
-  usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
-  fecha TEXT NOT NULL,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  animal_id BIGINT NOT NULL REFERENCES animales(id),
+  usuario_id BIGINT NOT NULL REFERENCES usuarios(id),
   estado TEXT NOT NULL DEFAULT 'pendiente'
     CHECK (estado IN ('pendiente', 'en_revision', 'aprobada',
                       'rechazada', 'cancelada', 'finalizada')),
-  comentario TEXT NOT NULL
+  comentario TEXT NOT NULL CHECK (char_length(comentario) BETWEEN 10 AND 500),
+  fecha TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Un adoptante no puede tener dos solicitudes activas para el mismo animal
