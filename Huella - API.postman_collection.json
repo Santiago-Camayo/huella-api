@@ -1,88 +1,602 @@
 {
   "info": {
-    "_postman_id": "7a4e624b-bb0a-4928-a3a1-7375e556314a",
     "name": "Huella - API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "58931758",
-    "_collection_link": "https://go.postman.co/collection/58931758-7a4e624b-bb0a-4928-a3a1-7375e556314a?source=collection_link"
+    "description": "Pruebas de la API de Huella. Ejecutar con la base recién sembrada (usuarios y animales del seed) y con baseUrl apuntando a local o a Render. Correr la colección completa, en orden.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "tokenInvalido",
+      "value": "token.invalido.xyz"
+    }
+  ],
   "item": [
     {
       "name": "Auth",
       "item": [
         {
+          "name": "health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: health', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('ok es true', () => pm.expect(j.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login fundación ok",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: login fundación ok', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tokenFundacion', j.token);",
+                  "pm.test('trae fundacion_id y es_admin', () => { pm.expect(j.usuario.fundacion_id).to.be.a('number'); pm.expect(j.usuario.es_admin).to.eql(true); });",
+                  "pm.test('no devuelve la contraseña', () => pm.expect(j.usuario).to.not.have.property('password_hash'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"fundacion@huella.org\",\n  \"password\": \"fundacion123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login adoptante ok",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: login adoptante ok', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tokenSantiago', j.token);",
+                  "pm.test('adoptante sin fundación', () => pm.expect(j.usuario.fundacion_id).to.eql(null));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"santiago@correo.com\",\n  \"password\": \"santiago123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "login contraseña incorrecta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401: login contraseña incorrecta', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"santiago@correo.com\",\n  \"password\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "login ok",
+          "name": "login sin correo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: login sin correo', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"santiago123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "register ok",
+          "name": "register ok (Ana)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('correoAna', 'ana' + Date.now() + '@correo.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201: register ok (Ana)', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tokenAna', j.token);",
+                  "pm.test('siempre adoptante', () => pm.expect(j.usuario.rol).to.eql('adoptante'));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Prueba\",\n  \"correo\": \"{{correoAna}}\",\n  \"telefono\": \"300 000 0000\",\n  \"password\": \"clave12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "register duplicado",
+          "name": "register ignora el rol enviado",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('correoBeto', 'beto' + Date.now() + '@correo.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201: register ignora el rol enviado', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tokenBeto', j.token);",
+                  "pm.test('rol adoptante', () => pm.expect(j.usuario.rol).to.eql('adoptante'));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Beto Prueba\",\n  \"correo\": \"{{correoBeto}}\",\n  \"password\": \"clave12345\",\n  \"rol\": \"fundacion\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register correo duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: register correo duplicado', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana\",\n  \"correo\": \"{{correoAna}}\",\n  \"password\": \"clave12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register contraseña de menos de 8",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: register contraseña de menos de 8', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"X\",\n  \"correo\": \"x@correo.com\",\n  \"password\": \"1234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
           "name": "register sin contraseña",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: register sin contraseña', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"X\",\n  \"correo\": \"x@correo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Token Fundacion",
+          "name": "ruta que no existe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404: ruta que no existe', () => pm.response.to.have.status(404));",
+                  "const j = pm.response.json();",
+                  "pm.test('error en JSON', () => pm.expect(j.error).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/ruta-inexistente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ruta-inexistente"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "me ok",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: me ok', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('es Ana', () => pm.expect(j.correo).to.eql(pm.collectionVariables.get('correoAna')));",
+                  "pm.test('no devuelve la contraseña', () => pm.expect(j).to.not.have.property('password_hash'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "me"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Token Ana",
+          "name": "me sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401: me sin token', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/usuarios/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "me con token inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401: me con token inválido', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenInvalido}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "me"
+              ]
             }
           },
           "response": []
@@ -93,155 +607,856 @@
       "name": "Animales",
       "item": [
         {
-          "name": "animal inexistente",
+          "name": "listar disponibles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: listar disponibles', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('animalId', j[0].id);",
+                  "pm.test('todos disponibles', () => pm.expect(j.every(a => a.estado === 'disponible')).to.eql(true));",
+                  "pm.test('trae nombre y ciudad de la fundación', () => { pm.expect(j[0].fundacion_nombre).to.be.a('string'); pm.expect(j[0].fundacion_ciudad).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales?estado=disponible",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "disponible"
+                }
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "detalle animal",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": ""
+          "name": "listar sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401: listar sin token', () => pm.response.to.have.status(401));"
+                ]
+              }
             }
-          },
-          "response": []
-        },
-        {
-          "name": "filtrar sexo y estado",
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
             }
           },
           "response": []
         },
         {
           "name": "filtrar por especie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: filtrar por especie', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('solo gatos', () => pm.expect(j.length > 0 && j.every(a => a.especie === 'gato')).to.eql(true));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales?especie=gato",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "especie",
+                  "value": "gato"
+                }
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Listar animales",
+          "name": "filtrar sexo y estado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: filtrar sexo y estado', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('solo hembras disponibles', () => pm.expect(j.every(a => a.sexo === 'hembra' && a.estado === 'disponible')).to.eql(true));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales?sexo=hembra&estado=disponible",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "sexo",
+                  "value": "hembra"
+                },
+                {
+                  "key": "estado",
+                  "value": "disponible"
+                }
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "sin token",
+          "name": "filtrar por nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: filtrar por nombre', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('encuentra a Max', () => pm.expect(j.length).to.eql(1));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales?nombre=max",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "nombre",
+                  "value": "max"
+                }
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "rear animal OK",
+          "name": "listar apartados",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: listar apartados', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('apartadoId', j[0].id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales?estado=apartado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "apartado"
+                }
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Crear sin nombre",
+          "name": "detalle de animal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: detalle de animal', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('trae la fundación', () => pm.expect(j.fundacion_nombre).to.be.a('string'));",
+                  "pm.test('activo es booleano', () => pm.expect(j.activo).to.be.a('boolean'));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{animalId}}"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Crear como adoptante",
+          "name": "detalle de animal inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404: detalle de animal inexistente', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "999999"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Editar animal OK",
+          "name": "detalle con id inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: detalle con id inválido', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "abc"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Editar como adoptante",
+          "name": "crear animal ok (fundación)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201: crear animal ok (fundación)', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('nuevoAnimalId', j.id);",
+                  "pm.test('queda disponible y activo', () => { pm.expect(j.estado).to.eql('disponible'); pm.expect(j.activo).to.eql(true); });",
+                  "pm.test('lleva la fundación del token', () => pm.expect(j.fundacion_id).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Retirar animal OK",
+          "name": "crear animal sin foto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: crear animal sin foto', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Ver animal retirado",
+          "name": "crear animal sin nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: crear animal sin nombre', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Retirar como adoptante",
+          "name": "crear animal como adoptante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: crear animal como adoptante', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "editar animal ok (sin foto conserva la actual)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: editar animal ok (sin foto conserva la actual)', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('cambió el nombre', () => pm.expect(j.nombre).to.eql('Zeus editado'));",
+                  "pm.test('conserva la foto', () => pm.expect(j.foto).to.include('zeus'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus editado\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 4,\n  \"sexo\": \"macho\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "editar animal como adoptante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: editar animal como adoptante', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "editar animal inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404: editar animal inexistente', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "999999"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "retirar animal como adoptante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: retirar animal como adoptante', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "retirar animal ok",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204: retirar animal ok', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ver animal retirado (sigue existiendo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: ver animal retirado (sigue existiendo)', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('activo es false', () => pm.expect(j.activo).to.eql(false));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "el retirado no sale en la lista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: el retirado no sale en la lista', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('lista vacía', () => pm.expect(j.length).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales?nombre=Zeus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "nombre",
+                  "value": "Zeus"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "retirar animal inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404: retirar animal inexistente', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "999999"
+              ]
             }
           },
           "response": []
@@ -252,232 +1467,1174 @@
       "name": "Solicitudes",
       "item": [
         {
-          "name": "Crear solicitud OK",
+          "name": "crear solicitud ok (Ana)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": []
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201: crear solicitud ok (Ana)', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('solicitudId', j.id);",
+                  "pm.test('queda pendiente', () => pm.expect(j.estado).to.eql('pendiente'));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{animalId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Solicitud duplicada",
+          "name": "solicitud duplicada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: solicitud duplicada', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{animalId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Comentario muy corto",
+          "name": "comentario muy corto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: comentario muy corto', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{animalId}}\",\n  \"comentario\": \"corto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Animal apartado",
+          "name": "animal apartado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: animal apartado', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{apartadoId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Animal retirado",
+          "name": "animal retirado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: animal retirado', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{nuevoAnimalId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Animal inexistente",
+          "name": "animal inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404: animal inexistente', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": 999999,\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Crear como fundación",
+          "name": "crear como fundación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: crear como fundación', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{animalId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Crear solicitud de otro adoptante",
+          "name": "crear sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401: crear sin token', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{animalId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Listar mis solicitudes (adoptante)",
+          "name": "listar mis solicitudes (adoptante)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: listar mis solicitudes (adoptante)', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('solo las mías', () => pm.expect(j.length).to.eql(1));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Listar todas (fundación)",
+          "name": "listar todas (fundación)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: listar todas (fundación)', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('incluye la de Ana', () => pm.expect(j.some(s => s.id === pm.collectionVariables.get('solicitudId'))).to.eql(true));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Filtrar por estado (fundación)",
+          "name": "filtrar por estado (fundación)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: filtrar por estado (fundación)', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('todas pendientes', () => pm.expect(j.every(s => s.estado === 'pendiente')).to.eql(true));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Detalle de solicitud propia",
+          "name": "detalle de solicitud propia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: detalle de solicitud propia', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Detalle de solicitud ajena",
+          "name": "detalle de solicitud ajena",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: detalle de solicitud ajena', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenBeto}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Detalle como fundación",
+          "name": "detalle como fundación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: detalle como fundación', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Solicitud inexistente",
+          "name": "solicitud inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404: solicitud inexistente', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999999"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Pasar a en_revision",
+          "name": "pasar a en_revision",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: pasar a en_revision', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('en_revision', () => pm.expect(j.estado).to.eql('en_revision'));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_revision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Aprobar solicitud 1",
+          "name": "adoptante no puede aprobar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: adoptante no puede aprobar', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Aprobar solicitud 2 duplicada",
+          "name": "aprobar solicitud",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: aprobar solicitud', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('aprobada', () => pm.expect(j.estado).to.eql('aprobada'));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Cancelar solicitud 1",
+          "name": "el animal quedó apartado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: el animal quedó apartado', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('apartado', () => pm.expect(j.estado).to.eql('apartado'));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{animalId}}"
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Cancelar como otro adoptante",
+          "name": "transición inválida (aprobada a en_revision)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: transición inválida (aprobada a en_revision)', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_revision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Transición inválida",
+          "name": "cancelar como otro adoptante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: cancelar como otro adoptante', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenBeto}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"cancelada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cancelar solicitud aprobada (dueño)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: cancelar solicitud aprobada (dueño)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"cancelada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "el animal volvió a disponible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: el animal volvió a disponible', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('disponible', () => pm.expect(j.estado).to.eql('disponible'));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
             "url": {
-              "raw": ""
+              "raw": "{{baseUrl}}/animales/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{animalId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "solicitud nueva tras cancelar (Beto)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201: solicitud nueva tras cancelar (Beto)', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('solicitudBetoId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenBeto}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animal_id\": \"{{animalId}}\",\n  \"comentario\": \"Quiero adoptarlo, tengo espacio y tiempo para cuidarlo.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rechazar solicitud",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: rechazar solicitud', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudBetoId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudBetoId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"rechazada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "estado final no cambia (rechazada a aprobada)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: estado final no cambia (rechazada a aprobada)', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudBetoId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudBetoId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cambiar estado sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401: cambiar estado sin token', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudBetoId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudBetoId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
