@@ -1,7 +1,23 @@
 # Estado de Huella API
 
-Actualizado: 30 oct 2026. Fase actual: **sin empezar la fase 1** (solo documentación).
-Próxima entrega: Sprint 1, 2 nov (virtual). Detalle de cada HU, regla y ruta en `docs/SRS.md`.
+Actualizado: 30 oct 2026. Fase actual: **fase 1 (Jira) en curso**; faltan 3 días para el Sprint 1.
+Detalle de cada HU, regla y ruta en `docs/SRS.md`.
+
+## Orden de trabajo
+| Fase | Qué | Quién | Estado |
+| --- | --- | --- | --- |
+| 1 | Tablero de Jira (proyecto HUE) | Claude con el MCP de Atlassian | Hecho: 4 épicas, 25 HU, 12 tareas (HUE-1 a HUE-41) y 3 sprints cargados (2, 9 y 17 nov). Proyecto compartido con la docente (HUE-30 en Listo) |
+| 2 | Migrar la API a PostgreSQL (plan corto y confirmación antes de codificar) | Claude | Pendiente de confirmación |
+| 3 | Desplegar en Render y probar | Santiago con Claude | Pendiente |
+| 4 | Proyecto Android del Sprint 1 | Santiago con Claude | Pendiente |
+
+Por ahora solo se hacen las fases 1 y 2. Las cuentas de Supabase y Render las crea Santiago.
+
+## Entregas
+- Sprint 1: 2 nov, virtual (HU definidas, código cargado, evidencia en video o documento).
+- Sprint 2: 9 nov, presencial (sustentación del código y demo en vivo).
+- Final: 17 nov (100% de las HU, APK, manual de usuario y manual técnico).
+- La API debe estar en la nube. Jira compartido con zulema.leon.e@uniautonoma.edu.co.
 
 Este estado sale de leer el código. La colección de Postman no se ejecutó para escribirlo,
 y Jira, Supabase, Render y la app Android no se revisaron desde este repositorio.
