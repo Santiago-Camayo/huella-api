@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entregables del Proyecto - Aplicaciones Móviles</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #17a2b8;
+            --accent-color: #ffc107;
+            --dark-color: #212529;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #eef2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-top: 30px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
+
+        .alert-box {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .alert-box strong {
+            color: var(--primary-color);
+        }
+
+        .email-highlight {
+            background-color: var(--accent-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .sprint-card {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .sprint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .sprint-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .sprint-date {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .tag-festivo {
+            background-color: #dc3545;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .req-card {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            border-top: 3px solid var(--secondary-color);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cronograma y Entregables del Proyecto - Aplicaciones Móviles</h1>
+
+    <div class="alert-box">
+        <p><strong>Configuración Inicial Obligatoria:</strong> Todas las historias de usuario deben gestionarse formalmente a través de una herramienta de gestión de proyectos (Trello, ClickUp, Jira, etc.).</p>
+        <p>Deberán compartir el acceso a su tablero de gestión con el correo: <span class="email-highlight">zulema.leon.e@uniautonoma.edu.co</span></p>
+    </div>
+
+    <h2>Planificación por Sprints</h2>
+
+    <!-- SPRINT 1 -->
+    <div class="sprint-card">
+        <div class="sprint-header">
+            <span class="sprint-title">Sprint 1: Avance Inicial y Funcionalidad Base</span>
+            <span class="sprint-date tag-festivo">2 de Noviembre (Día Festivo)</span>
+        </div>
+        <p><strong>Modalidad:</strong> Entrega Virtual (Carga de evidencias en la plataforma/gestor).</p>
+        <p><strong>Entregables requeridos:</strong></p>
+        <ul>
+            <li>Definición clara de las <strong>Historias de Usuario (HU)</strong> seleccionadas para este sprint.</li>
+            <li>Carga de evidencias del <strong>código fuente</strong> en el gestor o repositorio correspondiente.</li>
+            <li>Evidencia grabada o documental del <strong>funcionamiento</strong> de las historias de usuario de este sprint.</li>
+        </ul>
+    </div>
+
+    <!-- SPRINT 2 -->
+    <div class="sprint-card">
+        <div class="sprint-header">
+            <span class="sprint-title">Sprint 2: Avance Intermedio y Sustentación</span>
+            <span class="sprint-date">9 de Noviembre</span>
+        </div>
+        <p><strong>Modalidad:</strong> Presencial.</p>
+        <p><strong>Entregables requeridos:</strong></p>
+        <ul>
+            <li>Actualización y carga de evidencias de las HU del Sprint 2 en la herramienta de gestión.</li>
+            <li><strong>Sustentación presencial de código:</strong> Explicación del desarrollo e implementación del código correspondiente a este sprint.</li>
+            <li>Demostración de la funcionalidad acumulada en tiempo real.</li>
+        </ul>
+    </div>
+
+    <!-- SPRINT FINAL -->
+    <div class="sprint-card">
+        <div class="sprint-header">
+            <span class="sprint-title">Sprint Final: Entrega del Proyecto Completo</span>
+            <span class="sprint-date">17 de Noviembre</span>
+        </div>
+        <p><strong>Modalidad:</strong> Presencial / Sustentación Final.</p>
+        <p><strong>Entregables requeridos:</strong></p>
+        <ul>
+            <li>Cierre y verificación del 100% de las <strong>Historias de Usuario</strong> en la plataforma de gestión.</li>
+            <li>Sustentación final de código de la aplicación completa.</li>
+            <li>Entrega del archivo <strong>APK funcional e instalable</strong>.</li>
+            <li>Entrega de la documentación técnica y de usuario completa.</li>
+        </ul>
+    </div>
+
+    <h2>Requisitos Técnico-Funcionales y Entregables Finales</h2>
+    <div class="requirements-grid">
+        <div class="req-card">
+            <h3>APIs Propias y Desplegadas</h3>
+            <p>Las APIs consumidas por la aplicación móvil no deben ser locales. Deben ser desarrolladas por el equipo y estar <strong>desplegadas en un entorno accesible en la nube</strong>.</p>
+        </div>
+        <div class="req-card">
+            <h3>Manual de Usuario</h3>
+            <p>Documento detallado que explique paso a paso el uso de la aplicación, flujos de navegación, interfaz gráfica y guía para el usuario final.</p>
+        </div>
+        <div class="req-card">
+            <h3>Manual Técnico</h3>
+            <p>Documentación profunda que especifique:
+                <ul>
+                    <li>Tecnologías utilizadas (lenguajes, frameworks, librerías).</li>
+                    <li>Patrones de desarrollo implementados.</li>
+                    <li>Arquitectura de software aplicada (móvil y backend).</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <p><em>Nota: Recuerda que en cada entrega es obligatorio sustentar el código fuente.</em></p>
+    </div>
+</div>
+
+</body>
+</html>
