@@ -7,8 +7,8 @@ y desplegar (fase 3). Faltan 3 días para el Sprint 1. Detalle de cada HU, regla
 | Fase | Qué | Quién | Estado |
 | --- | --- | --- | --- |
 | 1 | Tablero de Jira (proyecto HUE) | Claude con el MCP de Atlassian | Hecho: 4 épicas, 25 HU, 12 tareas (HUE-1 a HUE-41) y 3 sprints (2, 9 y 17 nov). Compartido con la docente (HUE-30 en Listo) |
-| 2 | Migrar la API a PostgreSQL | Claude | Hecho en código y probado contra un PostgreSQL local. No probado todavía contra Supabase |
-| 3 | Desplegar en Render y probar | Santiago con Claude | Pendiente: falta el proyecto de Supabase y el servicio de Render |
+| 2 | Migrar la API a PostgreSQL | Claude | Hecho y probado contra Supabase (1 nov): 62 peticiones y 92 validaciones sin fallos. Evidencia en `docs/evidencias/newman-supabase.txt` (HUE-31 en Listo) |
+| 3 | Desplegar en Render y probar | Santiago con Claude | En curso: Supabase listo, falta el servicio de Render |
 | 4 | Proyecto Android del Sprint 1 | Santiago con Claude | Pendiente |
 
 Las cuentas de Supabase y Render las crea Santiago. Pasos en `README.md`.

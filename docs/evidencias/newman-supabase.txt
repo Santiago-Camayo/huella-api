@@ -1,0 +1,6 @@
+Colección Postman "Huella - API" contra la API local conectada a Supabase (Session pooler)
+Fecha: 1 nov 2026
+
+requests: 62 ejecutadas, 0 fallidas
+assertions: 92 ejecutadas, 0 fallidas
+Comando: npx newman@6 run "Huella - API.postman_collection.json" --env-var baseUrl=http://localhost:3999
