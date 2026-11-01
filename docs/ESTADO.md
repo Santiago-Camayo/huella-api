@@ -8,7 +8,7 @@ y desplegar (fase 3). Faltan 3 días para el Sprint 1. Detalle de cada HU, regla
 | --- | --- | --- | --- |
 | 1 | Tablero de Jira (proyecto HUE) | Claude con el MCP de Atlassian | Hecho: 4 épicas, 25 HU, 12 tareas (HUE-1 a HUE-41) y 3 sprints (2, 9 y 17 nov). Compartido con la docente (HUE-30 en Listo) |
 | 2 | Migrar la API a PostgreSQL | Claude | Hecho y probado contra Supabase (1 nov): 62 peticiones y 92 validaciones sin fallos. Evidencia en `docs/evidencias/newman-supabase.txt` (HUE-31 en Listo) |
-| 3 | Desplegar en Render y probar | Santiago con Claude | En curso: Supabase listo, falta el servicio de Render |
+| 3 | Desplegar en Render y probar | Santiago con Claude | Hecho (1 nov): https://huella-api-u3fo.onrender.com, Postman 62/62 y 92/92 sin fallos. Evidencia en `docs/evidencias/newman-render.txt` (HUE-32) |
 | 4 | Proyecto Android del Sprint 1 | Santiago con Claude | Pendiente |
 
 Las cuentas de Supabase y Render las crea Santiago. Pasos en `README.md`.
@@ -53,7 +53,7 @@ Ninguna está cerrada: la definición de hecho exige probarla en el APK contra l
 ## Siguiente (fase 3)
 1. Santiago crea el proyecto de Supabase y pasa `DATABASE_URL` (Session pooler) en un `.env` local.
 2. Arrancar la API contra Supabase y correr la colección de Postman.
-3. Santiago crea el servicio en Render (pasos en `README.md`) con una `JWT_SECRET` nueva.
+3. (Hecho) Servicio en Render creado.
 4. Correr la colección contra la URL de Render y guardar evidencias en `docs/evidencias`.
 5. Fuera de este repositorio: app Android del Sprint 1 y video de evidencia.
 

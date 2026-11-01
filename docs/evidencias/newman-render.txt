@@ -1,0 +1,7 @@
+Colección Postman "Huella - API" contra la API desplegada en Render
+URL: https://huella-api-u3fo.onrender.com
+Fecha: 1 nov 2026
+
+requests: 62 ejecutadas, 0 fallidas
+assertions: 92 ejecutadas, 0 fallidas
+Comando: npx newman@6 run "Huella - API.postman_collection.json" --env-var baseUrl=https://huella-api-u3fo.onrender.com
