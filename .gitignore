@@ -1,3 +1,5 @@
 node_modules/
 huella.db
 .env
+.env.*
+!.env.example
