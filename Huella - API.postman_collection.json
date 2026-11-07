@@ -1236,6 +1236,163 @@
           "response": []
         },
         {
+          "name": "la fundación ve solo sus animales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: la fundación ve solo sus animales', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('todos de mi fundación', () => pm.expect(j.length > 0 && j.every(a => a.fundacion_id == pm.collectionVariables.get('fundacionId'))).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "filtrar por fundación (adoptante)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: filtrar por fundación (adoptante)', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('solo de esa fundación', () => pm.expect(j.length > 0 && j.every(a => a.fundacion_id == pm.collectionVariables.get('fundacionId'))).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAna}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales?fundacionId={{fundacionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "fundacionId",
+                  "value": "{{fundacionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "otra fundación no puede editar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: otra fundación no puede editar', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "otra fundación no puede retirar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: otra fundación no puede retirar', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales/{{nuevoAnimalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales",
+                "{{nuevoAnimalId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "editar animal como adoptante",
           "event": [
             {
@@ -1468,6 +1625,48 @@
                 {
                   "key": "nombre",
                   "value": "Zeus"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "la fundación ve sus retirados",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: la fundación ve sus retirados', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('incluye el retirado', () => pm.expect(j.some(a => a.id == pm.collectionVariables.get('nuevoAnimalId'))).to.eql(true));",
+                  "pm.test('todos retirados', () => pm.expect(j.every(a => a.activo === false)).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales?estado=retirado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "retirado"
                 }
               ]
             }

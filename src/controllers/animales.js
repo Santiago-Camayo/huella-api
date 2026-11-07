@@ -9,11 +9,28 @@ const SQL_ANIMALES = `
   JOIN fundaciones f ON f.id = a.fundacion_id
 `;
 
-// GET /animales: solo activos, con filtros opcionales
-exports.listar = async (req, res) => {
-  const { nombre, especie, sexo, raza, estado } = req.query;
+// RN-18: una fundación solo modifica sus propios animales.
+// Responde 404 o 403 y devuelve false si no puede seguir.
+async function esDeMiFundacion(req, res) {
+  const { rows: [animal] } = await db.query('SELECT fundacion_id FROM animales WHERE id = $1', [req.params.id]);
+  if (!animal) {
+    res.status(404).json({ error: 'Animal no encontrado' });
+    return false;
+  }
+  if (animal.fundacion_id !== req.usuario.fundacion_id) {
+    res.status(403).json({ error: 'Este animal no es de tu fundación' });
+    return false;
+  }
+  return true;
+}
 
-  let sql = `${SQL_ANIMALES} WHERE a.activo = TRUE`;
+// GET /animales con filtros opcionales.
+// El adoptante ve los activos de todas las fundaciones (puede filtrar por fundacionId).
+// La fundación ve solo los suyos, también los retirados (HU-16); estado=retirado muestra solo esos.
+exports.listar = async (req, res) => {
+  const { nombre, especie, sexo, raza, estado, fundacionId } = req.query;
+
+  let sql = `${SQL_ANIMALES} WHERE TRUE`;
   const params = [];
   // Agrega una condición con su parámetro ($1, $2, ...)
   const filtrar = (condicion, valor) => {
@@ -21,11 +38,22 @@ exports.listar = async (req, res) => {
     sql += ` AND ${condicion.replace('?', `$${params.length}`)}`;
   };
 
+  if (req.usuario.rol === 'fundacion') {
+    filtrar('a.fundacion_id = ?', req.usuario.fundacion_id);
+  } else {
+    sql += ' AND a.activo = TRUE';
+    if (fundacionId) filtrar('a.fundacion_id = ?', fundacionId);
+  }
   if (nombre) filtrar('a.nombre ILIKE ?', `%${nombre}%`);
   if (especie) filtrar('a.especie = ?', especie);
   if (sexo) filtrar('a.sexo = ?', sexo);
   if (raza) filtrar('a.raza ILIKE ?', `%${raza}%`);
-  if (estado) filtrar('a.estado = ?', estado);
+  if (estado === 'retirado') {
+    sql += ' AND a.activo = FALSE';
+  } else if (estado) {
+    filtrar('a.estado = ?', estado);
+    sql += ' AND a.activo = TRUE';
+  }
 
   sql += ' ORDER BY a.nombre';
   const { rows } = await db.query(sql, params);
@@ -65,10 +93,9 @@ exports.crear = async (req, res) => {
   res.status(201).json(rows[0]);
 };
 
-// PUT /animales/:id (fundación). Si no llega foto, se conserva la actual.
+// PUT /animales/:id (fundación dueña). Si no llega foto, se conserva la actual.
 exports.editar = async (req, res) => {
-  const { rows: existe } = await db.query('SELECT id FROM animales WHERE id = $1', [req.params.id]);
-  if (existe.length === 0) return res.status(404).json({ error: 'Animal no encontrado' });
+  if (!(await esDeMiFundacion(req, res))) return;
 
   const error = validarAnimal(req.body);
   if (error) return res.status(400).json({ error });
@@ -91,10 +118,10 @@ exports.editar = async (req, res) => {
   res.json(rows[0]);
 };
 
-// DELETE /animales/:id (fundación): no borra, solo retira (activo = false)
+// DELETE /animales/:id (fundación dueña): no borra, solo retira (activo = false)
 exports.retirar = async (req, res) => {
-  const { rowCount } = await db.query('UPDATE animales SET activo = FALSE WHERE id = $1', [req.params.id]);
-  if (rowCount === 0) return res.status(404).json({ error: 'Animal no encontrado' });
+  if (!(await esDeMiFundacion(req, res))) return;
 
+  await db.query('UPDATE animales SET activo = FALSE WHERE id = $1', [req.params.id]);
   res.status(204).end();
 };
