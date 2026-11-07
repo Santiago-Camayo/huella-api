@@ -1,10 +1,11 @@
 // Solicitudes de adopción y cambios de estado.
 const db = require('../db');
 
-// Consulta base: incluye el nombre del animal y del adoptante
+// Consulta base: incluye datos del animal (y su fundación) y del adoptante
 const SQL_SOLICITUDES = `
   SELECT s.*, a.nombre AS animal_nombre, a.especie AS animal_especie,
-         u.nombre AS usuario_nombre, u.correo AS usuario_correo
+         a.estado AS animal_estado, a.fundacion_id,
+         u.nombre AS usuario_nombre, u.correo AS usuario_correo, u.telefono AS usuario_telefono
   FROM solicitudes s
   JOIN animales a ON a.id = s.animal_id
   JOIN usuarios u ON u.id = s.usuario_id
@@ -22,6 +23,11 @@ const TRANSICIONES = {
 async function buscarSolicitud(id) {
   const { rows } = await db.query(`${SQL_SOLICITUDES} WHERE s.id = $1`, [id]);
   return rows[0];
+}
+
+// RN-18: una fundación solo atiende las solicitudes de sus propios animales
+function esDeOtraFundacion(usuario, solicitud) {
+  return usuario.rol === 'fundacion' && solicitud.fundacion_id !== usuario.fundacion_id;
 }
 
 // POST /solicitudes (adoptante). El usuario sale del token, nunca del cuerpo.
@@ -67,9 +73,13 @@ exports.crear = async (req, res) => {
   res.status(201).json(await buscarSolicitud(nueva.id));
 };
 
-// GET /solicitudes: el adoptante ve las suyas; la fundación ve todas
+// GET /solicitudes: el adoptante ve las suyas; la fundación, las de sus animales.
+// orden=recientes (por defecto) o orden=antiguas (HU-21: pendientes más antiguas primero)
 exports.listar = async (req, res) => {
-  const { estado, animalId, usuarioId } = req.query;
+  const { estado, animalId, usuarioId, orden = 'recientes' } = req.query;
+  if (orden !== 'recientes' && orden !== 'antiguas') {
+    return res.status(400).json({ error: 'orden debe ser recientes o antiguas' });
+  }
 
   let sql = `${SQL_SOLICITUDES} WHERE TRUE`;
   const params = [];
@@ -81,18 +91,19 @@ exports.listar = async (req, res) => {
 
   if (req.usuario.rol === 'adoptante') {
     filtrar('s.usuario_id', req.usuario.id);
-  } else if (usuarioId) {
-    filtrar('s.usuario_id', usuarioId);
+  } else {
+    filtrar('a.fundacion_id', req.usuario.fundacion_id);
+    if (usuarioId) filtrar('s.usuario_id', usuarioId);
   }
   if (estado) filtrar('s.estado', estado);
   if (animalId) filtrar('s.animal_id', animalId);
 
-  sql += ' ORDER BY s.id DESC';
+  sql += orden === 'antiguas' ? ' ORDER BY s.fecha, s.id' : ' ORDER BY s.fecha DESC, s.id DESC';
   const { rows } = await db.query(sql, params);
   res.json(rows);
 };
 
-// GET /solicitudes/:id: solo el dueño o la fundación
+// GET /solicitudes/:id: solo el dueño o la fundación del animal
 exports.detalle = async (req, res) => {
   const solicitud = await buscarSolicitud(req.params.id);
 
@@ -102,6 +113,9 @@ exports.detalle = async (req, res) => {
   if (req.usuario.rol === 'adoptante' && solicitud.usuario_id !== req.usuario.id) {
     return res.status(403).json({ error: 'No puedes ver esta solicitud' });
   }
+  if (esDeOtraFundacion(req.usuario, solicitud)) {
+    return res.status(403).json({ error: 'Esta solicitud no es de tu fundación' });
+  }
 
   res.json(solicitud);
 };
@@ -109,8 +123,11 @@ exports.detalle = async (req, res) => {
 // PATCH /solicitudes/:id/estado
 exports.cambiarEstado = async (req, res) => {
   const { estado: nuevo } = req.body;
-  const { rows: [solicitud] } = await db.query('SELECT * FROM solicitudes WHERE id = $1', [req.params.id]);
+  const solicitud = await buscarSolicitud(req.params.id);
   if (!solicitud) return res.status(404).json({ error: 'Solicitud no encontrada' });
+  if (esDeOtraFundacion(req.usuario, solicitud)) {
+    return res.status(403).json({ error: 'Esta solicitud no es de tu fundación' });
+  }
 
   const esFundacion = req.usuario.rol === 'fundacion';
   const esDueno = req.usuario.rol === 'adoptante' && solicitud.usuario_id === req.usuario.id;

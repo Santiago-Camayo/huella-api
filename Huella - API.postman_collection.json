@@ -59,6 +59,7 @@
                   "pm.test('200: login fundación ok', () => pm.response.to.have.status(200));",
                   "const j = pm.response.json();",
                   "pm.collectionVariables.set('tokenFundacion', j.token);",
+                  "pm.collectionVariables.set('fundacionId', j.usuario.fundacion_id);",
                   "pm.test('trae fundacion_id y es_admin', () => { pm.expect(j.usuario.fundacion_id).to.be.a('number'); pm.expect(j.usuario.es_admin).to.eql(true); });",
                   "pm.test('no devuelve la contraseña', () => pm.expect(j.usuario).to.not.have.property('password_hash'));"
                 ]
@@ -86,6 +87,52 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"correo\": \"fundacion@huella.org\",\n  \"password\": \"fundacion123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login fundación 2 ok",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: login fundación 2 ok', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tokenFundacion2', j.token);",
+                  "pm.test('es otra fundación', () => pm.expect(j.usuario.fundacion_id).to.not.eql(pm.collectionVariables.get('fundacionId')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"fundacion2@huella.org\",\n  \"password\": \"fundacion123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -616,7 +663,7 @@
                 "exec": [
                   "pm.test('200: listar disponibles', () => pm.response.to.have.status(200));",
                   "const j = pm.response.json();",
-                  "pm.collectionVariables.set('animalId', j[0].id);",
+                  "pm.collectionVariables.set('animalId', j.find(a => a.fundacion_id == pm.collectionVariables.get('fundacionId')).id);",
                   "pm.test('todos disponibles', () => pm.expect(j.every(a => a.estado === 'disponible')).to.eql(true));",
                   "pm.test('trae nombre y ciudad de la fundación', () => { pm.expect(j[0].fundacion_nombre).to.be.a('string'); pm.expect(j[0].fundacion_ciudad).to.be.a('string'); });"
                 ]
@@ -1876,16 +1923,17 @@
           "response": []
         },
         {
-          "name": "listar todas (fundación)",
+          "name": "listar las de mi fundación",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200: listar todas (fundación)', () => pm.response.to.have.status(200));",
+                  "pm.test('200: listar las de mi fundación', () => pm.response.to.have.status(200));",
                   "const j = pm.response.json();",
-                  "pm.test('incluye la de Ana', () => pm.expect(j.some(s => s.id === pm.collectionVariables.get('solicitudId'))).to.eql(true));"
+                  "pm.test('incluye la de Ana', () => pm.expect(j.some(s => s.id == pm.collectionVariables.get('solicitudId'))).to.eql(true));",
+                  "pm.test('todas de mi fundación', () => pm.expect(j.every(s => s.fundacion_id == pm.collectionVariables.get('fundacionId'))).to.eql(true));"
                 ]
               }
             }
@@ -1905,6 +1953,121 @@
               ],
               "path": [
                 "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "otra fundación no ve la solicitud en su lista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: otra fundación no ve la solicitud en su lista', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('no incluye la de Ana', () => pm.expect(j.some(s => s.id == pm.collectionVariables.get('solicitudId'))).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ordenar antiguas primero",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: ordenar antiguas primero', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('fechas en orden ascendente', () => pm.expect(j.every((s, i) => i === 0 || j[i - 1].fecha <= s.fecha)).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?orden=antiguas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "orden",
+                  "value": "antiguas"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "orden inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: orden inválido', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?orden=raro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "orden",
+                  "value": "raro"
+                }
               ]
             }
           },
@@ -2027,7 +2190,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200: detalle como fundación', () => pm.response.to.have.status(200));"
+                  "pm.test('200: detalle como fundación', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('trae datos del adoptante y del animal', () => { pm.expect(j).to.have.property('usuario_telefono'); pm.expect(j.animal_estado).to.be.a('string'); });"
                 ]
               }
             }
@@ -2049,6 +2214,88 @@
                 "solicitudes",
                 "{{solicitudId}}"
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "detalle como otra fundación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: detalle como otra fundación', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "otra fundación no puede cambiar el estado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403: otra fundación no puede cambiar el estado', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/{{solicitudId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_revision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
