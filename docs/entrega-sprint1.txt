@@ -1,0 +1,37 @@
+HUELLA - ENTREGA SPRINT 1 (2 de noviembre de 2026)
+Aplicaciones Móviles - Docente: Zulema León
+Estudiante: Santiago Camayo
+
+HISTORIAS DE USUARIO DEL SPRINT 1
+HU-01 Registro de adoptante
+HU-02 Inicio de sesión
+HU-03 Recordar sesión
+HU-04 Cerrar sesión
+HU-06 Lista de animales disponibles
+HU-08 Detalle de un animal
+
+1. HISTORIAS DE USUARIO (Jira)
+Tablero del proyecto HUE (compartido con zulema.leon.e@uniautonoma.edu.co):
+https://uniautonoma-team-bxzcxmlf.atlassian.net/jira/software/projects/HUE/boards/2
+
+2. CÓDIGO FUENTE
+App Android (Kotlin + Jetpack Compose):
+https://github.com/Santiago-Camayo/huella-app
+API REST (Node.js + Express + PostgreSQL):
+https://github.com/Santiago-Camayo/huella-api
+
+3. EVIDENCIA DE FUNCIONAMIENTO
+Video de la app funcionando (HU-01, 02, 03, 04, 06 y 08):
+https://drive.google.com/drive/folders/16idJxlCv3nnNywSvtJwKxTasywuVP6O8?usp=sharing
+
+API desplegada en la nube (Render, base de datos en Supabase):
+https://huella-api-u3fo.onrender.com/health
+Nota: el servicio gratuito se duerme tras un rato sin uso; la primera petición puede tardar cerca de un minuto.
+
+Pruebas de la API con Postman (62 peticiones, 92 validaciones, 0 fallidas):
+Archivos docs/evidencias/newman-supabase.txt y docs/evidencias/newman-render.txt en el repositorio huella-api.
+
+Usuario de prueba (adoptante): santiago@correo.com / santiago123
+
+PENDIENTE PARA EL SPRINT 2
+Confirmación de contraseña (HU-01), aviso "Tu sesión expiró" y botón Reintentar sin red (HU-03), y confirmación antes de cerrar sesión (HU-04).
