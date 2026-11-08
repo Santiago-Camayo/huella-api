@@ -1,0 +1,1 @@
+Este archivo no es una imagen. Lo usa la colección de Postman para probar el error.

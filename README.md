@@ -8,9 +8,17 @@ Los requisitos, rutas y reglas de negocio están en `docs/SRS.md`.
 | --- | --- |
 | `DATABASE_URL` | Cadena de conexión de PostgreSQL (Supabase) |
 | `JWT_SECRET` | Clave para firmar los tokens. Larga y aleatoria; nunca se sube a git |
+| `SUPABASE_URL` | URL del proyecto de Supabase (`https://<proyecto>.supabase.co`), para guardar las fotos |
+| `SUPABASE_SERVICE_KEY` | Clave `service_role` de Supabase (Project Settings → API Keys). Solo la usa la API; nunca va en la app ni en git |
 | `PORT` | Opcional. Render la define sola; en local es 3000 |
 
-La API no arranca si falta `DATABASE_URL` o `JWT_SECRET`.
+La API no arranca si falta alguna de las cuatro primeras.
+
+## Fotos de los animales
+Las fotos se guardan en Supabase Storage, en un bucket **público** llamado `animales` (créalo en Storage → New bucket).
+`POST /animales` recibe un formulario `multipart/form-data` con los datos del animal y el archivo en el campo `foto`
+(JPG, PNG o WEBP de hasta 5 MB). La API lo sube a Storage y guarda en la base solo la URL pública.
+`PUT /animales/{id}` acepta el mismo formulario con la foto opcional, o JSON sin foto.
 
 Para generar un `JWT_SECRET`:
 ```bash
@@ -59,7 +67,9 @@ Conviene abrir `/health` antes de cada demo.
 ## Pruebas en Postman
 Importa `Huella - API.postman_collection.json` y ejecútala completa y en orden con la base recién
 sembrada. Cada ruta tiene al menos una prueba, con su caso de error. La variable `baseUrl`
-apunta a local por defecto.
+apunta a local por defecto. Las pruebas de fotos usan los archivos de `postman/`: en Postman, configura
+la carpeta del repositorio como *working directory*, o córrela desde la raíz con
+`npx newman@6 run "Huella - API.postman_collection.json"`.
 
 ## Estructura
 - `src/server.js`: prepara la base y arranca el servidor

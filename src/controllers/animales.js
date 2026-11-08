@@ -1,6 +1,7 @@
 // CRUD de animales.
 const db = require('../db');
 const { validarAnimal } = require('../validators/animal');
+const { subirFoto } = require('../db/storage');
 
 // Consulta base: incluye el nombre y la ciudad de la fundación
 const SQL_ANIMALES = `
@@ -69,14 +70,28 @@ exports.detalle = async (req, res) => {
   res.json(rows[0]);
 };
 
-// POST /animales (fundación). La fundación sale del token.
-exports.crear = async (req, res) => {
-  const error = validarAnimal(req.body);
-  if (error) return res.status(400).json({ error });
-  // Todo animal se publica con foto (por ahora llega como URL; la subida de archivos es del Sprint 2)
-  if (!req.body.foto) return res.status(400).json({ error: 'La foto es obligatoria' });
+// En multipart todo llega como texto: convierte la edad y los "bueno_con_*" a su tipo.
+// Con JSON los valores ya vienen bien y quedan igual.
+function leerFormulario(cuerpo = {}) {
+  const siNo = (v) => (v === true || v === 'true' ? true : v === false || v === 'false' ? false : null);
+  return {
+    ...cuerpo,
+    edad: typeof cuerpo.edad === 'string' && cuerpo.edad.trim() !== '' ? Number(cuerpo.edad) : cuerpo.edad,
+    bueno_con_ninos: siNo(cuerpo.bueno_con_ninos),
+    bueno_con_perros: siNo(cuerpo.bueno_con_perros),
+    bueno_con_gatos: siNo(cuerpo.bueno_con_gatos),
+  };
+}
 
-  const a = req.body;
+// POST /animales (fundación), multipart con la foto obligatoria (HU-17). La fundación sale del token.
+exports.crear = async (req, res) => {
+  const a = leerFormulario(req.body);
+  const error = validarAnimal(a);
+  if (error) return res.status(400).json({ error });
+  if (!req.file) return res.status(400).json({ error: 'La foto es obligatoria' });
+
+  // Se valida antes de subir para no dejar fotos sueltas en Storage
+  a.foto = await subirFoto(req.file);
   const { rows: [nuevo] } = await db.query(
     `INSERT INTO animales (nombre, especie, especie_otra, raza, edad, sexo, descripcion,
        personalidad, bueno_con_ninos, bueno_con_perros, bueno_con_gatos, foto, fundacion_id)
@@ -97,10 +112,11 @@ exports.crear = async (req, res) => {
 exports.editar = async (req, res) => {
   if (!(await esDeMiFundacion(req, res))) return;
 
-  const error = validarAnimal(req.body);
+  const a = leerFormulario(req.body);
+  const error = validarAnimal(a);
   if (error) return res.status(400).json({ error });
 
-  const a = req.body;
+  a.foto = req.file ? await subirFoto(req.file) : null;
   await db.query(
     `UPDATE animales SET nombre = $1, especie = $2, especie_otra = $3, raza = $4, edad = $5,
        sexo = $6, descripcion = $7, personalidad = $8, bueno_con_ninos = $9,

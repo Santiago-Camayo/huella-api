@@ -998,18 +998,20 @@
           "response": []
         },
         {
-          "name": "crear animal ok (fundación)",
+          "name": "crear animal con foto ok (fundación)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('201: crear animal ok (fundación)', () => pm.response.to.have.status(201));",
+                  "pm.test('201: crear animal con foto ok (fundación)', () => pm.response.to.have.status(201));",
                   "const j = pm.response.json();",
                   "pm.collectionVariables.set('nuevoAnimalId', j.id);",
                   "pm.test('queda disponible y activo', () => { pm.expect(j.estado).to.eql('disponible'); pm.expect(j.activo).to.eql(true); });",
-                  "pm.test('lleva la fundación del token', () => pm.expect(j.fundacion_id).to.be.a('number'));"
+                  "pm.test('lleva la fundación del token', () => pm.expect(j.fundacion_id).to.be.a('number'));",
+                  "pm.test('la foto quedó en Supabase Storage', () => pm.expect(j.foto).to.include('/storage/v1/object/public/animales/'));",
+                  "pm.test('edad y convivencia con su tipo', () => { pm.expect(j.edad).to.eql(3); pm.expect(j.bueno_con_ninos).to.eql(true); });"
                 ]
               }
             }
@@ -1017,10 +1019,6 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{tokenFundacion}}"
@@ -1036,13 +1034,49 @@
               ]
             },
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "Zeus",
+                  "type": "text"
+                },
+                {
+                  "key": "especie",
+                  "value": "perro",
+                  "type": "text"
+                },
+                {
+                  "key": "raza",
+                  "value": "Labrador",
+                  "type": "text"
+                },
+                {
+                  "key": "edad",
+                  "value": "3",
+                  "type": "text"
+                },
+                {
+                  "key": "sexo",
+                  "value": "macho",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Animal de prueba",
+                  "type": "text"
+                },
+                {
+                  "key": "bueno_con_ninos",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "postman/foto-prueba.png"
                 }
-              }
+              ]
             }
           },
           "response": []
@@ -1055,7 +1089,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('400: crear animal sin foto', () => pm.response.to.have.status(400));"
+                  "pm.test('400: crear animal sin foto', () => pm.response.to.have.status(400));",
+                  "const j = pm.response.json();",
+                  "pm.test('pide la foto', () => pm.expect(j.error).to.include('foto'));"
                 ]
               }
             }
@@ -1063,10 +1099,6 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{tokenFundacion}}"
@@ -1082,13 +1114,122 @@
               ]
             },
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Zeus\",\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "Zeus",
+                  "type": "text"
+                },
+                {
+                  "key": "especie",
+                  "value": "perro",
+                  "type": "text"
+                },
+                {
+                  "key": "raza",
+                  "value": "Labrador",
+                  "type": "text"
+                },
+                {
+                  "key": "edad",
+                  "value": "3",
+                  "type": "text"
+                },
+                {
+                  "key": "sexo",
+                  "value": "macho",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Animal de prueba",
+                  "type": "text"
+                },
+                {
+                  "key": "bueno_con_ninos",
+                  "value": "true",
+                  "type": "text"
                 }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear animal con archivo que no es imagen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: crear animal con archivo que no es imagen', () => pm.response.to.have.status(400));"
+                ]
               }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "Zeus",
+                  "type": "text"
+                },
+                {
+                  "key": "especie",
+                  "value": "perro",
+                  "type": "text"
+                },
+                {
+                  "key": "raza",
+                  "value": "Labrador",
+                  "type": "text"
+                },
+                {
+                  "key": "edad",
+                  "value": "3",
+                  "type": "text"
+                },
+                {
+                  "key": "sexo",
+                  "value": "macho",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Animal de prueba",
+                  "type": "text"
+                },
+                {
+                  "key": "bueno_con_ninos",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "postman/no-imagen.txt"
+                }
+              ]
             }
           },
           "response": []
@@ -1110,9 +1251,78 @@
             "method": "POST",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacion}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "especie",
+                  "value": "perro",
+                  "type": "text"
+                },
+                {
+                  "key": "raza",
+                  "value": "Labrador",
+                  "type": "text"
+                },
+                {
+                  "key": "edad",
+                  "value": "3",
+                  "type": "text"
+                },
+                {
+                  "key": "sexo",
+                  "value": "macho",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Animal de prueba",
+                  "type": "text"
+                },
+                {
+                  "key": "bueno_con_ninos",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "postman/foto-prueba.png"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear animal con edad fuera de rango",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: crear animal con edad fuera de rango', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{tokenFundacion}}"
@@ -1128,13 +1338,49 @@
               ]
             },
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"especie\": \"perro\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"sexo\": \"macho\",\n  \"descripcion\": \"Animal de prueba\",\n  \"foto\": \"https://picsum.photos/seed/zeus/600/400\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "Zeus",
+                  "type": "text"
+                },
+                {
+                  "key": "especie",
+                  "value": "perro",
+                  "type": "text"
+                },
+                {
+                  "key": "raza",
+                  "value": "Labrador",
+                  "type": "text"
+                },
+                {
+                  "key": "edad",
+                  "value": "31",
+                  "type": "text"
+                },
+                {
+                  "key": "sexo",
+                  "value": "macho",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Animal de prueba",
+                  "type": "text"
+                },
+                {
+                  "key": "bueno_con_ninos",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "postman/foto-prueba.png"
                 }
-              }
+              ]
             }
           },
           "response": []
@@ -1196,7 +1442,7 @@
                   "pm.test('200: editar animal ok (sin foto conserva la actual)', () => pm.response.to.have.status(200));",
                   "const j = pm.response.json();",
                   "pm.test('cambió el nombre', () => pm.expect(j.nombre).to.eql('Zeus editado'));",
-                  "pm.test('conserva la foto', () => pm.expect(j.foto).to.include('zeus'));"
+                  "pm.test('conserva la foto', () => pm.expect(j.foto).to.include('/storage/v1/object/public/animales/'));"
                 ]
               }
             }

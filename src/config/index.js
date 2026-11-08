@@ -15,4 +15,6 @@ module.exports = {
   JWT_SECRET: requerida('JWT_SECRET'), // clave para firmar tokens
   JWT_EXPIRA: '7d',
   DATABASE_URL: requerida('DATABASE_URL'), // cadena de conexión de PostgreSQL (Supabase)
+  SUPABASE_URL: requerida('SUPABASE_URL'), // https://<proyecto>.supabase.co, para Storage
+  SUPABASE_SERVICE_KEY: requerida('SUPABASE_SERVICE_KEY'), // clave service_role: solo la usa la API
 };
