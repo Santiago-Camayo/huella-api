@@ -48,6 +48,48 @@ exports.register = async (req, res) => {
   res.status(201).json({ token: firmarToken(usuario), usuario: usuarioPublico(usuario) });
 };
 
+// POST /auth/registro-fundacion (HU-05, RN-20): crea la fundación y su administrador en una sola operación.
+// Cuerpo: { fundacion: { nombre, ciudad, telefono? }, admin: { nombre, correo, password } }
+exports.registroFundacion = async (req, res) => {
+  const { fundacion = {}, admin = {} } = req.body || {};
+
+  if (!fundacion.nombre || !fundacion.ciudad || !admin.nombre || !admin.correo || !admin.password) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios' });
+  }
+  if (typeof admin.password !== 'string' || admin.password.length < 8) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+  }
+
+  const { rows: existe } = await db.query('SELECT id FROM usuarios WHERE correo = $1', [admin.correo]);
+  if (existe.length > 0) {
+    return res.status(409).json({ error: 'El correo ya está registrado' });
+  }
+
+  // Las dos inserciones van en una transacción: o se crean ambas o ninguna
+  const cliente = await db.connect();
+  let usuario;
+  try {
+    await cliente.query('BEGIN');
+    const { rows: [nueva] } = await cliente.query(
+      'INSERT INTO fundaciones (nombre, ciudad, telefono) VALUES ($1, $2, $3) RETURNING id',
+      [fundacion.nombre, fundacion.ciudad, fundacion.telefono || null]
+    );
+    ({ rows: [usuario] } = await cliente.query(
+      `INSERT INTO usuarios (nombre, correo, telefono, password_hash, rol, fundacion_id, es_admin)
+       VALUES ($1, $2, $3, $4, 'fundacion', $5, TRUE) RETURNING *`,
+      [admin.nombre, admin.correo, fundacion.telefono || null, bcrypt.hashSync(admin.password, 10), nueva.id]
+    ));
+    await cliente.query('COMMIT');
+  } catch (err) {
+    await cliente.query('ROLLBACK');
+    throw err;
+  } finally {
+    cliente.release();
+  }
+
+  res.status(201).json({ token: firmarToken(usuario), usuario: usuarioPublico(usuario) });
+};
+
 // POST /auth/login
 exports.login = async (req, res) => {
   const { correo, password } = req.body;

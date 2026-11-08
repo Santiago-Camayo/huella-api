@@ -514,6 +514,225 @@
           "response": []
         },
         {
+          "name": "registrar fundación ok",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('correoAdmin', 'admin' + Date.now() + '@fundacion.org');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201: registrar fundación ok', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tokenFundacionNueva', j.token);",
+                  "pm.test('es administradora de una fundación', () => { pm.expect(j.usuario.rol).to.eql('fundacion'); pm.expect(j.usuario.es_admin).to.eql(true); pm.expect(j.usuario.fundacion_id).to.be.a('number'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro-fundacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro-fundacion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fundacion\": {\n    \"nombre\": \"Fundación de Prueba\",\n    \"ciudad\": \"Neiva\",\n    \"telefono\": \"300 111 2222\"\n  },\n  \"admin\": {\n    \"nombre\": \"Laura Admin\",\n    \"correo\": \"{{correoAdmin}}\",\n    \"password\": \"clave12345\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "la fundación nueva empieza sin animales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200: la fundación nueva empieza sin animales', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('lista vacía', () => pm.expect(j.length).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenFundacionNueva}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "registrar fundación con correo repetido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409: registrar fundación con correo repetido', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro-fundacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro-fundacion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fundacion\": {\n    \"nombre\": \"Otra\",\n    \"ciudad\": \"Cali\"\n  },\n  \"admin\": {\n    \"nombre\": \"X\",\n    \"correo\": \"santiago@correo.com\",\n    \"password\": \"clave12345\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "registrar fundación sin ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: registrar fundación sin ciudad', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro-fundacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro-fundacion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fundacion\": {\n    \"nombre\": \"Otra\"\n  },\n  \"admin\": {\n    \"nombre\": \"X\",\n    \"correo\": \"x@fundacion.org\",\n    \"password\": \"clave12345\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "registrar fundación con contraseña corta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: registrar fundación con contraseña corta', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro-fundacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro-fundacion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fundacion\": {\n    \"nombre\": \"Otra\",\n    \"ciudad\": \"Cali\"\n  },\n  \"admin\": {\n    \"nombre\": \"X\",\n    \"correo\": \"x@fundacion.org\",\n    \"password\": \"1234\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "ruta que no existe",
           "event": [
             {
