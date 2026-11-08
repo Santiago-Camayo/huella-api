@@ -155,7 +155,7 @@ Las reglas las aplica la API y, cuando es posible, también la base de datos con
 | RN-12 | Con el animal retirado no se puede aprobar ni finalizar, pero sí rechazar o cancelar | 409 |
 | RN-13 | Retirar un animal solo pone `activo = false`; se conserva el historial | 204 |
 | RN-14 | Un animal adoptado no se edita | 409 |
-| RN-15 | Un adoptante solo ve sus solicitudes; la fundación ve todas | 403 al abrir una ajena |
+| RN-15 | Un adoptante solo ve sus solicitudes; la fundación ve las de sus propios animales (RN-18) | 403 al abrir una ajena |
 | RN-16 | Una cuenta desactivada no puede iniciar sesión; el administrador no puede desactivar su propia cuenta | 403 |
 | RN-17 | Las fotos son JPG, PNG o WEBP de hasta 5 MB | 400 |
 | RN-18 | Cada fundación ve y gestiona solo sus propios animales y solicitudes; los adoptantes ven los animales de todas las fundaciones | 403 |
