@@ -1,7 +1,7 @@
 # Estado de Huella
 
-Actualizado: 8 nov 2026. Fase actual: **Sprint 2 terminado en código**, falta probarlo en el teléfono
-antes de la sustentación del 9 nov. Detalle de cada HU, regla y ruta en `docs/SRS.md`.
+Actualizado: 9 nov 2026. Fase actual: **Sprint 2 terminado y probado en el teléfono**; sigue el
+Sprint 3 (entrega final el 17 nov). Detalle de cada HU, regla y ruta en `docs/SRS.md`.
 
 ## Repositorios y servicios
 - API: este repositorio (`huella-api`), desplegada en https://huella-api-u3fo.onrender.com
@@ -35,17 +35,17 @@ antes de la sustentación del 9 nov. Detalle de cada HU, regla y ruta en `docs/S
 ## HU por sprint
 | Sprint | HU | Estado |
 | --- | --- | --- |
-| 1 | HU-01, 02, 03, 04, 06, 08 | Hechas en la app. En Jira: 02, 06 y 08 en Listo; 01, 03 y 04 En curso hasta probar en el teléfono los detalles que se agregaron el 7 nov (confirmar contraseña, sesión expirada y Reintentar, confirmación al cerrar sesión) |
-| 2 | HU-05, 07, 09, 10, 12, 16, 17, 21, 22 | Hechas en API y app (compila). **Sin probar en el teléfono.** En Jira siguen Por hacer |
+| 1 | HU-01, 02, 03, 04, 06, 08 | Listas en Jira con evidencia. Los detalles de 01, 03 y 04 (confirmar contraseña, sesión expirada y Reintentar, confirmación al cerrar sesión) se probaron el 9 nov |
+| 2 | HU-05, 07, 09, 10, 12, 16, 17, 21, 22 | Listas en Jira con evidencia: probadas en el teléfono contra la API desplegada el 9 nov. Tareas HUE-35 (fotos) y HUE-36 (filtro por fundación) también en Listo |
 | 3 | HU-11, 13, 14, 15, 18, 19, 20, 23, 24, 25 | Pendientes |
 
 La definición de hecho exige probar cada HU en el APK contra la API desplegada antes de moverla a Listo.
 
-## Siguiente
-1. Probar en el teléfono todo el Sprint 2 (guion de prueba en la conversación) y corregir lo que falle.
-2. Mover las HU probadas a Listo en Jira con su evidencia.
-3. Sprint 3: finalizar adopción, editar y retirar animal en la app, dashboard, equipo y cambio de
-   contraseña, favoritos, perfil, APK y manuales.
+## Siguiente (Sprint 3, entrega final el 17 nov)
+1. Finalizar adopción (HU-23, RN-11 y RN-12) y 409 al editar un animal adoptado (RN-14).
+2. Editar y retirar animales desde la app, dashboard de la fundación, equipo y cambio de contraseña.
+3. Favoritos y perfil completo del adoptante, detalle de solicitud (HU-11).
+4. APK instalable, manual de usuario y manual técnico.
 
 ## Puntos a tener en cuenta
 - **Fotos de ejemplo:** los 6 animales del seed tienen fotos de ejemplo (picsum) que la app no muestra:
