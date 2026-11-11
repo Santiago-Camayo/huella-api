@@ -11,18 +11,18 @@ const SQL_ANIMALES = `
 `;
 
 // RN-18: una fundación solo modifica sus propios animales.
-// Responde 404 o 403 y devuelve false si no puede seguir.
+// Devuelve el animal ({ fundacion_id, estado }), o responde 404 o 403 y devuelve null.
 async function esDeMiFundacion(req, res) {
-  const { rows: [animal] } = await db.query('SELECT fundacion_id FROM animales WHERE id = $1', [req.params.id]);
+  const { rows: [animal] } = await db.query('SELECT fundacion_id, estado FROM animales WHERE id = $1', [req.params.id]);
   if (!animal) {
     res.status(404).json({ error: 'Animal no encontrado' });
-    return false;
+    return null;
   }
   if (animal.fundacion_id !== req.usuario.fundacion_id) {
     res.status(403).json({ error: 'Este animal no es de tu fundación' });
-    return false;
+    return null;
   }
-  return true;
+  return animal;
 }
 
 // GET /animales con filtros opcionales.
@@ -108,9 +108,15 @@ exports.crear = async (req, res) => {
   res.status(201).json(rows[0]);
 };
 
-// PUT /animales/:id (fundación dueña). Si no llega foto, se conserva la actual.
+// PUT /animales/:id (fundación dueña, HU-18). Si no llega foto, se conserva la actual.
+// El estado no se edita aquí: lo cambian las solicitudes.
 exports.editar = async (req, res) => {
-  if (!(await esDeMiFundacion(req, res))) return;
+  const animal = await esDeMiFundacion(req, res);
+  if (!animal) return;
+  // RN-14: un animal adoptado no se edita
+  if (animal.estado === 'adoptado') {
+    return res.status(409).json({ error: 'Un animal adoptado no se puede editar' });
+  }
 
   const a = leerFormulario(req.body);
   const error = validarAnimal(a);

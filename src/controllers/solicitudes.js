@@ -11,12 +11,12 @@ const SQL_SOLICITUDES = `
   JOIN usuarios u ON u.id = s.usuario_id
 `;
 
-// Transiciones permitidas: estado actual -> { nuevo estado: quién puede hacerlo }
-// (versión corta: falta "finalizada")
+// Transiciones permitidas: estado actual -> { nuevo estado: quién puede hacerlo }.
+// Rechazada, cancelada y finalizada son estados finales: no salen de ahí.
 const TRANSICIONES = {
   pendiente:   { en_revision: 'fundacion', rechazada: 'fundacion', cancelada: 'dueno' },
   en_revision: { aprobada: 'fundacion', rechazada: 'fundacion', cancelada: 'dueno' },
-  aprobada:    { rechazada: 'fundacion', cancelada: 'dueno' },
+  aprobada:    { finalizada: 'fundacion', rechazada: 'fundacion', cancelada: 'dueno' },
 };
 
 // Devuelve una solicitud con los datos del animal y del adoptante (o undefined)
@@ -158,6 +158,10 @@ exports.cambiarEstado = async (req, res) => {
       return res.status(409).json({ error: 'Ya hay una solicitud aprobada para este animal' });
     }
   }
+  // RN-12: con el animal retirado no se puede finalizar (sí rechazar o cancelar)
+  if (nuevo === 'finalizada' && !animal.activo) {
+    return res.status(409).json({ error: 'El animal fue retirado: no se puede finalizar la adopción' });
+  }
 
   // Cambio de la solicitud y del animal en una sola transacción
   const cliente = await db.connect();
@@ -167,6 +171,15 @@ exports.cambiarEstado = async (req, res) => {
 
     if (nuevo === 'aprobada') {
       await cliente.query("UPDATE animales SET estado = 'apartado' WHERE id = $1", [animal.id]);
+    }
+    // RN-11: al finalizar, el animal queda adoptado y las demás solicitudes activas se rechazan
+    if (nuevo === 'finalizada') {
+      await cliente.query("UPDATE animales SET estado = 'adoptado' WHERE id = $1", [animal.id]);
+      await cliente.query(
+        `UPDATE solicitudes SET estado = 'rechazada'
+         WHERE animal_id = $1 AND id != $2 AND estado IN ('pendiente', 'en_revision')`,
+        [animal.id, solicitud.id]
+      );
     }
     // Si se rechaza o cancela una solicitud aprobada, el animal vuelve a disponible
     if (solicitud.estado === 'aprobada' && (nuevo === 'rechazada' || nuevo === 'cancelada')) {
@@ -182,3 +195,6 @@ exports.cambiarEstado = async (req, res) => {
 
   res.json(await buscarSolicitud(solicitud.id));
 };
+
+// La usa el dashboard para mostrar las últimas solicitudes con los mismos datos
+exports.SQL_SOLICITUDES = SQL_SOLICITUDES;

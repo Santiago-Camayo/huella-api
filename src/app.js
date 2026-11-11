@@ -12,6 +12,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/usuarios', require('./routes/usuarios'));
 app.use('/animales', require('./routes/animales'));
 app.use('/solicitudes', require('./routes/solicitudes'));
+app.use('/dashboard', require('./routes/dashboard'));
 
 // Siempre al final
 app.use(rutaNoEncontrada);

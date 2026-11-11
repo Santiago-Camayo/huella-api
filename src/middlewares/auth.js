@@ -35,4 +35,12 @@ function requerirAdoptante(req, res, next) {
   next();
 }
 
-module.exports = { requerirSesion, requerirFundacion, requerirAdoptante };
+// Solo deja pasar al administrador de una fundación (RN-21). Usar DESPUÉS de requerirSesion
+function requerirAdmin(req, res, next) {
+  if (req.usuario.rol !== 'fundacion' || !req.usuario.es_admin) {
+    return res.status(403).json({ error: 'Solo el administrador de la fundación puede hacer esta acción' });
+  }
+  next();
+}
+
+module.exports = { requerirSesion, requerirFundacion, requerirAdoptante, requerirAdmin };

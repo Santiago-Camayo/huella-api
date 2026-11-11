@@ -8,7 +8,7 @@ const { JWT_SECRET, JWT_EXPIRA } = require('../config');
 function usuarioPublico(u) {
   return {
     id: u.id, nombre: u.nombre, correo: u.correo, telefono: u.telefono, rol: u.rol,
-    fundacion_id: u.fundacion_id, es_admin: u.es_admin,
+    fundacion_id: u.fundacion_id, es_admin: u.es_admin, activo: u.activo,
     debe_cambiar_password: u.debe_cambiar_password,
   };
 }
